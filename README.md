@@ -3,6 +3,11 @@
 ## Overview
 
 This Java project serves as an algo trading analytics tool designed to identify breakout failure patterns in financial markets and notify users accordingly. Breakout failure patterns occur when a financial instrument's price breaks out of a defined range but fails to maintain momentum, often indicating potential reversal or continuation of the previous trend. This tool aims to assist traders and analysts in making informed decisions by detecting such patterns and providing timely notifications.
+## Breakout Failure Chart: Double Top Failure and Breakout in 3rd Attempt
+
+![Breakout Failure Chart](https://www.tradingview.com/i/eAr5qpYN/)
+
+This chart illustrates a double top failure pattern followed by a breakout in the third attempt. In a double top pattern, the price reaches a high point, retraces, and then fails to break above the previous high, indicating potential weakness. In this example, the price attempts to break out twice but fails before successfully breaking out on the third attempt.
 
 ## Features
 
