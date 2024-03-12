@@ -1,15 +1,19 @@
 package com.example.demo.services;
 
 import com.example.demo.records.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
+
 @Service
 public class PostService {
     private final RestClient restClient;
-
+    @Value("${vnalytics.nse.equity.tokens}")
+    private List<String> nseTokens;
     public PostService() {
         restClient = RestClient.builder()
                 .baseUrl("https://apiconnect.angelbroking.com")
@@ -40,7 +44,7 @@ public class PostService {
                 .retrieve()
                 .body(ApiResponse.class);
     }
-    public CandleApiResponse getDailyCandles(String jwt)
+    public CandleApiResponse getDailyCandles(String jwt, CandleDataRequest candleDataRequest)
     {
        return restClient.post()
 
@@ -48,7 +52,7 @@ public class PostService {
                 .contentType(MediaType.APPLICATION_JSON)
 
                 .header("Authorization","Bearer "+jwt)
-                .body(new CandleDataRequest("NSE","3045","ONE_DAY","2022-09-06 00:00", "2023-09-06 00:00"))
+                .body(candleDataRequest)
                 .retrieve()
                 .body(new ParameterizedTypeReference<CandleApiResponse>(){});
     }
