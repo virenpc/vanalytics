@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.records.CandleApiResponse;
 import com.example.demo.records.CandleDataRequest;
+import com.example.demo.services.CandleService;
 import com.example.demo.services.PostService;
 import com.example.demo.records.ApiResponse;
 import com.example.demo.records.User;
@@ -24,6 +25,9 @@ public class AngelController {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private CandleService candleService;
     @PostMapping("login")
     public ApiResponse login(String clientcode, String password, int totp){
         return postService.login(new User(clientcode, password, totp));
@@ -36,12 +40,12 @@ public class AngelController {
     }
     @PostMapping("processCandlesForBreakOutFailurePattern")
     public List<String> processCandlesForBreakOutFailurePattern(String clientcode, String password, int totp ){
-        CandleApiResponse candleApiResponse = null;
+        CandleApiResponse candleApiResponse;
         List<String> tokensWithPatternMatch = new ArrayList<>();
         for (String nseToken:nseTokens)
         {
             candleApiResponse = getCandleData(clientcode,password,totp,nseToken);
-            if (postService.processCandlesForBreakOutFailurePattern2(candleApiResponse.data())){
+            if (candleService.processCandlesForBreakOutFailurePattern2(candleApiResponse.data())){
                 tokensWithPatternMatch.add(nseToken);
             }
         }
