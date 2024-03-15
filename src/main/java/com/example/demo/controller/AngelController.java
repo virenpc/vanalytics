@@ -6,17 +6,21 @@ import com.example.demo.services.PostService;
 import com.example.demo.records.ApiResponse;
 import com.example.demo.records.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class AngelController {
-
+    @Value("${vnalytics.nse.equity.tokens}")
+    private List<String> nseTokens;
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
     @Autowired
     private PostService postService;
@@ -30,5 +34,18 @@ public class AngelController {
         //Max supported Candle is daily frame and 2000 days
         return postService.getDailyCandles(jwtToken, new CandleDataRequest("NSE", symboltoken, "ONE_DAY", LocalDate.now().minusDays(2000).format(FORMATTER), LocalDate.now().format(FORMATTER)));
     }
+    @PostMapping("processCandlesForBreakOutFailurePattern")
+    public List<String> processCandlesForBreakOutFailurePattern(String clientcode, String password, int totp ){
+        CandleApiResponse candleApiResponse = null;
+        List<String> tokensWithPatternMatch = new ArrayList<>();
+        for (String nseToken:nseTokens)
+        {
+            candleApiResponse = getCandleData(clientcode,password,totp,nseToken);
+            if (postService.processCandlesForBreakOutFailurePattern2(candleApiResponse.data())){
+                tokensWithPatternMatch.add(nseToken);
+            }
+        }
 
+        return tokensWithPatternMatch;
+    }
 }

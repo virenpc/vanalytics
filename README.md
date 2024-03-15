@@ -1,4 +1,3 @@
-# Work in progress
 # Algo Trading Analytics Tool - Breakout Failure Pattern Identification
 
 ## Overview
@@ -41,5 +40,16 @@ For any inquiries or support, please contact viren.chande@gmail.com
 
 - Java Development Kit (JDK) version 21 or higher.
 - Git installed on your local machine.
-- Account with angel broking
+- Account with angel broking and TOTP enabled account https://smartapi.angelbroking.com/enable-totp
+
+## Sample
+
+Use swagger for now to detect failure double top for now before we make a UI
+![Alt text](/swagger-ss.png?raw=true "Shows list of nse tokens / symbols that match the pattern")
+
+## TODO
+- Create a UI to display the matches
+- Perhaps a notification may be weekly on whatsapp/telegram. Dont read emails much these days
+- Google has a TOTP library to automate the totp generation but dont feel like using it to automate totp. There is a reason its designed that way.
+- Make use of Virtual threads and limit the rates when doing IO calls to fetch data via Candle API from broker. https://smartapi.angelbroking.com/docs/RateLimit
 
