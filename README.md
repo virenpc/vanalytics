@@ -38,7 +38,7 @@ For any inquiries or support, please contact viren.chande@gmail.com
 
 ## Pre-requisites
 
-- Java Development Kit (JDK) version 21 or higher.
+- Java Development Kit (JDK) version 21 or higher and preview enables for virtual threads and Structured tasks.
 - Git installed on your local machine.
 - Account with angel broking and TOTP enabled account https://smartapi.angelbroking.com/enable-totp
 
@@ -51,5 +51,5 @@ Use swagger for now to detect failure double top for now before we make a UI
 - Create a UI to display the matches
 - Perhaps a notification may be weekly on whatsapp/telegram. Dont read emails much these days
 - Google has a TOTP library to automate the totp generation but dont feel like using it to automate totp. There is a reason its designed that way.
-- Make use of Virtual threads and limit the rates when doing IO calls to fetch data via Candle API from broker. https://smartapi.angelbroking.com/docs/RateLimit
+
 

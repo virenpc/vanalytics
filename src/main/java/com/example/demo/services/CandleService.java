@@ -1,5 +1,7 @@
 package com.example.demo.services;
 
+import com.example.demo.records.CandleApiResponse;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -9,7 +11,7 @@ import java.util.List;
 
 @Service
 public class CandleService {
-    public boolean processCandlesForBreakOutFailurePattern2(List<List<Object>> ohlcData) {
+    public boolean processCandlesForBreakOutFailurePattern(List<List<Object>> ohlcData) {
         // Step 1: Sort the list based on "high" attribute
         ohlcData.sort(Comparator.comparingDouble(candle -> (double) candle.get(2)));
 
@@ -40,12 +42,16 @@ public class CandleService {
 
         // Step 3: Print the result
         if (secondHighestPivotHighCandle != null) {
-            System.out.println("Second highest high candle meeting criteria: " + secondHighestPivotHighCandle);
+            System.out.println("Second highest high candle meeting criteria:" + secondHighestPivotHighCandle);
             return true;
         } else {
-            System.out.println("No second highest high candle meeting criteria found");
+            System.out.println("No second highest high candle meeting criteria found for symbol/token");
             return false;
         }
 
+    }
+
+    public Pair<String, List<List<Object>>> transform(String symbolToken, CandleApiResponse candleApiResponse) {
+        return Pair.of(symbolToken,candleApiResponse.data());
     }
 }
