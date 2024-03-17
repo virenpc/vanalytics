@@ -13,7 +13,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_STRING" value="--enable-preview --source 21 -parameters" />
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="vanalytics" options="-parameters --enable-preview" />
+      <module name="vanalytics" options="-parameters" />
     </option>
   </component>
 </project>

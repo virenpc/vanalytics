@@ -1,22 +1,20 @@
 package com.example.demo.services;
 
-import com.example.demo.records.*;
-import org.springframework.beans.factory.annotation.Value;
+import com.example.demo.records.ApiResponse;
+import com.example.demo.records.CandleApiResponse;
+import com.example.demo.records.CandleDataRequest;
+import com.example.demo.records.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-
 @Service
 public class PostService {
     private final RestClient restClient;
-
+    Logger logger = LoggerFactory.getLogger(PostService.class);
     public PostService() {
         restClient = RestClient.builder()
                 .baseUrl("https://apiconnect.angelbroking.com")
@@ -49,7 +47,8 @@ public class PostService {
     }
     public CandleApiResponse getDailyCandles(String jwt, CandleDataRequest candleDataRequest)
     {
-       return restClient.post()
+        logger.info("Sending request for symbol :: {}",candleDataRequest.symboltoken());
+        return restClient.post()
 
                 .uri("rest/secure/angelbroking/historical/v1/getCandleData")
                 .contentType(MediaType.APPLICATION_JSON)
