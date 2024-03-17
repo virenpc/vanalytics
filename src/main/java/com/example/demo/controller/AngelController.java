@@ -51,7 +51,7 @@ public class AngelController {
     public List<String> processCandlesForBreakOutFailurePattern(String clientcode, String password, int totp ){
         List<String> tokensWithPatternMatch = new ArrayList<>();
 
-        ArrayList<Pair<String, List<List<Object>>>> candleDataList = getCandleData(clientcode,password,totp,nseTokens);
+        ArrayList<Pair<String, List<List<Object>>>> candleDataList = candleService.getCandleData(clientcode,password,totp,nseTokens);
         for(Pair<String, List<List<Object>>> candleData : candleDataList) {
             logger.info("Process symbol {}", candleData.getLeft());
             if (candleData.getRight() != null && candleService.processCandlesForBreakOutFailurePattern(candleData.getRight())) {
@@ -61,49 +61,6 @@ public class AngelController {
         }
             return tokensWithPatternMatch;
     }
-    public ArrayList<Pair<String, List<List<Object>>>> getCandleData(String clientcode, String password, int totp, List<String> symbolTokens){
-        String jwtToken = postService.login(new User(clientcode, password, totp)).data().jwtToken();
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(3);
-        List<ScheduledFuture<Pair<String, List<List<Object>>>>> futures = new ArrayList<>();
-        var symbolTokenToCandleResponse = new ArrayList<Pair<String, List<List<Object>>>>();
-        int delay =0;
-        int requestCounter =0;
-        //Max supported Candle is daily frame and 2000 days and rate limit is 3 https://smartapi.angelbroking.com/docs/RateLimit
-        for (String symbolToken : symbolTokens) {
 
-            futures.add((ScheduledFuture<Pair<String, List<List<Object>>>>) service.schedule(() -> get(clientcode,password,totp,symbolToken,jwtToken),delay++,TimeUnit.SECONDS));
-            // Increment the request counter
-            requestCounter++;
-
-            // If 3 requests have been scheduled, reset the delay and wait for the next second
-            if (requestCounter % 3 == 0) {
-                delay = requestCounter / 3; // Reset delay to wait for the next second
-            }
-        }
-        for (Future<Pair<String, List<List<Object>>>> f : futures) {
-            try {
-                symbolTokenToCandleResponse.add(f.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }
-//        for (String symbolToken : symbolTokens) {
-//            service.scheduleWithFixedDelay(() -> {
-//                        System.out.println("VVVVVV");
-//                        logger.info("VVVVVVVVVVVVVV");
-//
-//                    }
-//            ,1,1,TimeUnit.SECONDS);
-//        }
-        service.close();
-        return symbolTokenToCandleResponse;
-    }
-
-    private Pair<String, List<List<Object>>> get(String clientcode, String password, int totp, String symbolToken, String jwtToken) {
-        //            Thread.sleep(1000);//FIXME : Change this as rate limit is time based even though results are out API seems to throw exception
-        CandleApiResponse candleApiResponse = postService.getDailyCandles(jwtToken, new CandleDataRequest("NSE", symbolToken, "ONE_DAY", LocalDate.now().minusDays(2000).format(FORMATTER), LocalDate.now().format(FORMATTER)));
-        return candleService.transform(symbolToken, candleApiResponse);
-
-    }
 
 }

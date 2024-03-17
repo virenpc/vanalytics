@@ -44,9 +44,9 @@ For any inquiries or support, please contact viren.chande@gmail.com
 
 ## Sample
 
-Use swagger for now to detect failure double top for now before we make a UI
+- Use swagger for now to detect failure double top for now before we make a UI
 ![Alt text](/swagger-ss.png?raw=true "Shows list of nse tokens / symbols that match the pattern")
-
+- Here's one sample from our codebase![CINEVISTA](https://www.tradingview.com/i/poLLBtUI/)
 ## TODO
 - Create a UI to display the matches
 - Perhaps a notification may be weekly on whatsapp/telegram. Dont read emails much these days
