@@ -48,8 +48,7 @@ For any inquiries or support, please contact viren.chande@gmail.com
 ![Alt text](/swagger-ss.png?raw=true "Shows list of nse tokens / symbols that match the pattern")
 - Here's one sample from our codebase![CINEVISTA](https://www.tradingview.com/i/poLLBtUI/)
 ## TODO
-- Create a UI to display the matches
-- Perhaps a notification may be weekly on whatsapp/telegram. Dont read emails much these days
+- Notification may be weekly on whatsapp/telegram. Dont read emails much these days
 - Google has a TOTP library to automate the totp generation but dont feel like using it to automate totp. There is a reason its designed that way.
 
 
