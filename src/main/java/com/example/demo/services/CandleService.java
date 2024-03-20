@@ -65,35 +65,36 @@ public class CandleService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(3);
-        List<ScheduledFuture<Pair<String, List<List<Object>>>>> futures = new ArrayList<>();
-        var symbolTokenToCandleResponse = new ArrayList<Pair<String, List<List<Object>>>>();
-        int delay = 0;
-        int requestCounter = 0;
-        //Max supported Candle is daily frame and 2000 days and rate limit is 3 https://smartapi.angelbroking.com/docs/RateLimit
-        for (String symbolToken : symbolTokens) {
+        try(ScheduledExecutorService service = Executors.newScheduledThreadPool(3)) {
+            List<ScheduledFuture<Pair<String, List<List<Object>>>>> futures = new ArrayList<>();
+            var symbolTokenToCandleResponse = new ArrayList<Pair<String, List<List<Object>>>>();
+            int delay = 0;
+            int requestCounter = 0;
+            //Max supported Candle is daily frame and 2000 days and rate limit is 3 https://smartapi.angelbroking.com/docs/RateLimit
+            for (String symbolToken : symbolTokens) {
 
-            futures.add(service.schedule(() -> get(symbolToken, jwtToken), delay++, TimeUnit.SECONDS));
-            // Increment the request counter
-            requestCounter++;
+                futures.add(service.schedule(() -> get(symbolToken, jwtToken), delay++, TimeUnit.SECONDS));
+                // Increment the request counter
+                requestCounter++;
 
-            // If 3 requests have been scheduled, reset the delay and wait for the next second
-            if (requestCounter % 3 == 0) {
-                delay = requestCounter / 3; // Reset delay to wait for the next second
+                // If 3 requests have been scheduled, reset the delay and wait for the next second
+                if (requestCounter % 3 == 0) {
+                    delay = requestCounter / 3; // Reset delay to wait for the next second
+                }
             }
-        }
-        for (Future<Pair<String, List<List<Object>>>> f : futures) {
-            try {
-                symbolTokenToCandleResponse.add(f.get(3, TimeUnit.SECONDS));
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                logger.error("Processing failed while fetching data :", e);
-                throw new RuntimeException(e);
+            for (Future<Pair<String, List<List<Object>>>> f : futures) {
+                try {
+                    symbolTokenToCandleResponse.add(f.get(3, TimeUnit.SECONDS));
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    logger.error("Processing failed while fetching data :", e);
+                    throw new RuntimeException(e);
+                }
             }
+            return symbolTokenToCandleResponse;
         }
 
-        service.close();
-        return symbolTokenToCandleResponse;
     }
+
 
     private Pair<String, List<List<Object>>> get(String symbolToken, String jwtToken) {
         CandleApiResponse candleApiResponse = postService.getDailyCandles(jwtToken, new CandleDataRequest("NSE", symbolToken, "ONE_DAY", LocalDate.now().minusDays(2000).format(FORMATTER), LocalDate.now().format(FORMATTER)));
