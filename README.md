@@ -47,6 +47,8 @@ For any inquiries or support, please contact viren.chande@gmail.com
 - Use swagger for now to detect failure double top for now before we make a UI
 ![Alt text](/swagger-ss.png?raw=true "Shows list of nse tokens / symbols that match the pattern")
 - Here's one sample from our codebase![CINEVISTA](https://www.tradingview.com/i/poLLBtUI/)
+- Sample output message in Telegram group by the integrated bot
+  ![Alt text](/Telegram.jpg?raw=true "Telegram message")
 ## TODO
 - Notification may be weekly on whatsapp/telegram. Dont read emails much these days
 - Google has a TOTP library to automate the totp generation but dont feel like using it to automate totp. There is a reason its designed that way.
