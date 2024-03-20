@@ -56,6 +56,9 @@ public class PostService {
                 .header("Authorization","Bearer "+jwt)
                 .body(candleDataRequest)
                 .retrieve()
+//                .onStatus(org.springframework.http.HttpStatusCode::is4xxClientError, (request, response) -> {
+//                    throw new RuntimeException("Failed to retrieve for Symbol "+candleDataRequest.symboltoken()+" Response :: "+ response.getBody());
+//                })
                 .body(new ParameterizedTypeReference<>(){});
     }
 

@@ -4,6 +4,8 @@ import com.example.demo.records.CandleApiResponse;
 import com.example.demo.records.CandleDataRequest;
 import com.example.demo.records.User;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,10 @@ import java.util.concurrent.*;
 public class CandleService {
     @Autowired
     private PostService postService;
+
+    private final Logger logger = LoggerFactory.getLogger(CandleService.class);
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
+
     public boolean processCandlesForBreakOutFailurePattern(List<List<Object>> ohlcData) {
         // Step 1: Sort the list based on "high" attribute
         ohlcData.sort(Comparator.comparingDouble(candle -> (double) candle.get(2)));
@@ -49,25 +54,26 @@ public class CandleService {
             }
         }
 
-        // Step 3: Print the result
-        if (secondHighestPivotHighCandle != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return secondHighestPivotHighCandle != null;
 
     }
-    public ArrayList<Pair<String, List<List<Object>>>> getCandleData(String clientcode, String password, int totp, List<String> symbolTokens){
+
+    public ArrayList<Pair<String, List<List<Object>>>> getCandleData(String clientcode, String password, int totp, List<String> symbolTokens) {
         String jwtToken = postService.login(new User(clientcode, password, totp)).data().jwtToken();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         ScheduledExecutorService service = Executors.newScheduledThreadPool(3);
         List<ScheduledFuture<Pair<String, List<List<Object>>>>> futures = new ArrayList<>();
         var symbolTokenToCandleResponse = new ArrayList<Pair<String, List<List<Object>>>>();
-        int delay =0;
-        int requestCounter =0;
+        int delay = 0;
+        int requestCounter = 0;
         //Max supported Candle is daily frame and 2000 days and rate limit is 3 https://smartapi.angelbroking.com/docs/RateLimit
         for (String symbolToken : symbolTokens) {
 
-            futures.add((ScheduledFuture<Pair<String, List<List<Object>>>>) service.schedule(() -> get(clientcode,password,totp,symbolToken,jwtToken),delay++, TimeUnit.SECONDS));
+            futures.add(service.schedule(() -> get(symbolToken, jwtToken), delay++, TimeUnit.SECONDS));
             // Increment the request counter
             requestCounter++;
 
@@ -78,8 +84,9 @@ public class CandleService {
         }
         for (Future<Pair<String, List<List<Object>>>> f : futures) {
             try {
-                symbolTokenToCandleResponse.add(f.get());
-            } catch (InterruptedException | ExecutionException e) {
+                symbolTokenToCandleResponse.add(f.get(3, TimeUnit.SECONDS));
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                logger.error("Processing failed while fetching data :", e);
                 throw new RuntimeException(e);
             }
         }
@@ -88,13 +95,13 @@ public class CandleService {
         return symbolTokenToCandleResponse;
     }
 
-    private Pair<String, List<List<Object>>> get(String clientcode, String password, int totp, String symbolToken, String jwtToken) {
-        //            Thread.sleep(1000);//FIXME : Change this as rate limit is time based even though results are out API seems to throw exception
+    private Pair<String, List<List<Object>>> get(String symbolToken, String jwtToken) {
         CandleApiResponse candleApiResponse = postService.getDailyCandles(jwtToken, new CandleDataRequest("NSE", symbolToken, "ONE_DAY", LocalDate.now().minusDays(2000).format(FORMATTER), LocalDate.now().format(FORMATTER)));
         return transform(symbolToken, candleApiResponse);
 
     }
+
     public Pair<String, List<List<Object>>> transform(String symbolToken, CandleApiResponse candleApiResponse) {
-        return Pair.of(symbolToken,candleApiResponse.data());
+        return Pair.of(symbolToken, candleApiResponse.data());
     }
 }

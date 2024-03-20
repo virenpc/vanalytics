@@ -1,11 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.records.ApiResponse;
 import com.example.demo.records.CandleApiResponse;
 import com.example.demo.records.CandleDataRequest;
+import com.example.demo.records.User;
 import com.example.demo.services.CandleService;
 import com.example.demo.services.PostService;
-import com.example.demo.records.ApiResponse;
-import com.example.demo.records.User;
+import com.example.demo.services.TelegramMessageService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +20,16 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Map;
 
 
 @RestController
 @RequestMapping("/api")
 public class AngelController {
-    @Value("${vnalytics.nse.equity.tokens}")
-    private List<String> nseTokens;
+
+
+    @Value("#{${token}}")
+    private Map<String,String> symobolTokenMap;
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
 
     @Autowired
@@ -35,6 +38,8 @@ public class AngelController {
     @Autowired
     private CandleService candleService;
 
+    @Autowired
+    private TelegramMessageService telegramMessageService;
     Logger logger = LoggerFactory.getLogger(AngelController.class);
 
     @PostMapping("login")
@@ -50,16 +55,16 @@ public class AngelController {
     @PostMapping("processCandlesForBreakOutFailurePattern")
     public List<String> processCandlesForBreakOutFailurePattern(String clientcode, String password, int totp ){
         List<String> tokensWithPatternMatch = new ArrayList<>();
-
-        ArrayList<Pair<String, List<List<Object>>>> candleDataList = candleService.getCandleData(clientcode,password,totp,nseTokens);
+        ArrayList<Pair<String, List<List<Object>>>> candleDataList = candleService.getCandleData(clientcode,password,totp,symobolTokenMap.keySet().stream().toList());
         for(Pair<String, List<List<Object>>> candleData : candleDataList) {
             logger.info("Process symbol {}", candleData.getLeft());
             if (candleData.getRight() != null && candleService.processCandlesForBreakOutFailurePattern(candleData.getRight())) {
                 logger.info("Matched for symbol {}",candleData.getLeft());
-                tokensWithPatternMatch.add(candleData.getLeft());
+                tokensWithPatternMatch.add(symobolTokenMap.get(candleData.getLeft()));
             }
         }
-            return tokensWithPatternMatch;
+        telegramMessageService.sendMessage(tokensWithPatternMatch.toString());
+       return tokensWithPatternMatch;
     }
 
 
