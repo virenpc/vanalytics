@@ -19,11 +19,10 @@ import java.util.concurrent.*;
 
 @Service
 public class CandleService {
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
+    private final Logger logger = LoggerFactory.getLogger(CandleService.class);
     @Autowired
     private PostService postService;
-
-    private final Logger logger = LoggerFactory.getLogger(CandleService.class);
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
 
     public boolean processCandlesForBreakOutFailurePattern(List<List<Object>> ohlcData) {
         // Step 1: Sort the list based on "high" attribute
@@ -41,8 +40,7 @@ public class CandleService {
             double currentHigh = (double) currentCandle.get(2);
 
             // Check if the current candle is 6 months before and within 5% below the highest high
-            if (currentDate.isBefore(highestDate.minusMonths(6)) &&
-                    highestHigh - currentHigh <= highestHigh * 0.05) {
+            if (currentDate.isBefore(highestDate.minusMonths(6)) && highestHigh - currentHigh <= highestHigh * 0.05) {
                 // Check if the difference in heights is within 2%
                 if (highestHigh - currentHigh <= highestHigh * 0.02) {
                     secondHighestPivotHighCandle = currentCandle;
@@ -65,7 +63,7 @@ public class CandleService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        try(ScheduledExecutorService service = Executors.newScheduledThreadPool(3)) {
+        try (ScheduledExecutorService service = Executors.newScheduledThreadPool(3)) {
             List<ScheduledFuture<Pair<String, List<List<Object>>>>> futures = new ArrayList<>();
             var symbolTokenToCandleResponse = new ArrayList<Pair<String, List<List<Object>>>>();
             int delay = 0;
@@ -87,7 +85,6 @@ public class CandleService {
                     symbolTokenToCandleResponse.add(f.get(3, TimeUnit.SECONDS));
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     logger.error("Processing failed while fetching data :", e);
-                    throw new RuntimeException(e);
                 }
             }
             return symbolTokenToCandleResponse;
