@@ -50,7 +50,8 @@ For any inquiries or support, please contact viren.chande@gmail.com
 - Sample output message in Telegram group by the integrated bot
   ![Alt text](/Telegram.jpg?raw=true "Telegram message")
 ## TODO
-- Notification may be weekly on whatsapp/telegram. Dont read emails much these days
+- Deploy it in cloud. Find a good free tier.
+- Notification may be weekly on telegram.
 - Google has a TOTP library to automate the totp generation but dont feel like using it to automate totp. There is a reason its designed that way.
 
 
